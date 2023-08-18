@@ -16,8 +16,8 @@ var (
 
 func msgHandler(conn *net.UDPConn, src *net.UDPAddr, n int, content []byte) {
 	var err error
-	message := string(content)
-	log.Infof("来自%v,Discovered %v", src, string(content))
+	message := string(content[:n])
+	log.Infof("来自%v,Discovered %v", src, string(content[:n]))
 	// 广播的查询接口
 	if message == utils.Query {
 		myStatus.Lock()
