@@ -16,5 +16,7 @@ spec:
     spec:
       containers:
         - name: udpserver
-          image: lmxia/udpserver:v1
+          image: lmxia/udpserver:v2
       hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: pi
