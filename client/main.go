@@ -48,6 +48,12 @@ func listenUdp(socket *net.UDPConn) {
 				fmt.Println("发送lock数据失败，err: ", err)
 				return
 			}
+		} else if ack == string(utils.Locked) {
+			_, err = socket.WriteToUDP([]byte(utils.UnLock), remoteAddr) // 发送数据
+			if err != nil {
+				fmt.Println("发送unlock数据失败，err: ", err)
+				return
+			}
 		}
 	}
 }

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udpserver
+  namespace: default
+  labels:
+    app: sudpserveryncer
+spec:
+  selector:
+    matchLabels:
+      app: udpserver
+  template:
+    metadata:
+      labels:
+        app: udpserver
+    spec:
+      containers:
+        - name: udpserver
+          image: lmxia/udpserver:v1
+      hostNetwork: true
