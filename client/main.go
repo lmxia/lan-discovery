@@ -35,7 +35,7 @@ func listenUdp(socket *net.UDPConn) {
 	for {
 		data := make([]byte, 4096)
 		n, remoteAddr, err := socket.ReadFromUDP(data) // 接收数据
-		log.Infof("read %s from <%s>\n", data[:n], socket.RemoteAddr())
+		log.Infof("read %s from <%s>\n", data[:n], remoteAddr)
 		if err != nil {
 			fmt.Println("接收数据失败, err: ", err)
 			return

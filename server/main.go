@@ -30,7 +30,7 @@ func msgHandler(conn *net.UDPConn, src *net.UDPAddr, n int, content []byte) {
 		myStatus.Lock()
 		defer myStatus.Unlock()
 		myStatus.Status = utils.Locked
-		_, err = conn.WriteToUDP([]byte("ok"), src) // 发送数据
+		_, err = conn.WriteToUDP([]byte("ok, i was locked just now."), src) // 发送数据
 		if err != nil {
 			log.Infof("Write to udp failed, err:  %s", err)
 		}
@@ -38,12 +38,12 @@ func msgHandler(conn *net.UDPConn, src *net.UDPAddr, n int, content []byte) {
 		myStatus.Lock()
 		defer myStatus.Unlock()
 		myStatus.Status = utils.Free
-		_, err = conn.WriteToUDP([]byte("ok"), src) // 发送数据
+		_, err = conn.WriteToUDP([]byte("ok, i am free right now."), src) // 发送数据
 		if err != nil {
 			log.Infof("Write to udp failed, err:  %s", err)
 		}
 	} else {
-		_, err = conn.WriteToUDP([]byte("nothing"), src) // 发送数据
+		_, err = conn.WriteToUDP([]byte("i can't understand."), src) // 发送数据
 		if err != nil {
 			log.Infof("Write to udp failed, err:  %s", err)
 		}
@@ -52,6 +52,7 @@ func msgHandler(conn *net.UDPConn, src *net.UDPAddr, n int, content []byte) {
 
 func main() {
 	c := make(chan os.Signal)
+	myStatus.Status = utils.Free
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM,
 		syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 	utils.RegisterSignal(c)
