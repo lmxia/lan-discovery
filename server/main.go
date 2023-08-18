@@ -51,5 +51,5 @@ func main() {
 		syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 	utils.RegisterSignal(c)
 
-	utils.Listen("127.0.0.1:2000", msgHandler)
+	utils.Listen(":2000", msgHandler)
 }
