@@ -13,21 +13,16 @@ const (
 	maxDatagramSize = 8192
 )
 
-type OperateCode string
 type HostStatus string
 
 const (
-	Query  OperateCode = "query"
-	Lock   OperateCode = "lock"
-	UnLock OperateCode = "unlock"
+	Query  string = "query"
+	Lock   string = "lock"
+	UnLock string = "unlock"
 
 	Free   HostStatus = "free"
 	Locked HostStatus = "locked"
 )
-
-type UdpMessage struct {
-	Code OperateCode
-}
 
 type HostTwin struct {
 	sync.Mutex
@@ -35,23 +30,17 @@ type HostTwin struct {
 }
 
 // NewBroadcaster creates a new UDP multicast connection on which to broadcast
-func NewBroadcaster(port int) (*net.UDPConn, error) {
-	lAddr := &net.UDPAddr{
-		IP:   net.IPv4(127, 0, 0, 1),
-		Port: port,
+func NewBroadcaster() (*net.UDPConn, error) {
+	broadcastAddr, err := net.ResolveUDPAddr("udp", "255.255.255.255:2000")
+	if err != nil {
+		panic(err)
 	}
-
-	// 这里设置接收者的IP地址为广播地址
-	rAddr := &net.UDPAddr{
-		IP:   net.IPv4(255, 255, 255, 255),
-		Port: port,
-	}
-	conn, err := net.DialUDP("udp", lAddr, rAddr)
+	udpConn, err := net.DialUDP("udp", nil, broadcastAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	return conn, nil
+	return udpConn, nil
 }
 
 // Listen binds to the UDP address and port given and writes packets received

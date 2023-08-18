@@ -13,11 +13,10 @@ import (
 
 // UDP 客户端
 func main() {
-
 	c := make(chan os.Signal)
 	signal.Notify(c)
 
-	socket, err := utils.NewBroadcaster(2000)
+	socket, err := utils.NewBroadcaster()
 	if err != nil {
 		log.Infof("UDP广播发送失败，%s: ", err)
 	}
