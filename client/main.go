@@ -5,7 +5,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/lmxia/lan-discovery/utils"
 	log "github.com/sirupsen/logrus"
@@ -16,7 +15,7 @@ func main() {
 	c := make(chan os.Signal)
 	signal.Notify(c)
 
-	socket, err := utils.NewBroadcaster()
+	socket, dstAddr, err := utils.NewBroadcaster()
 	if err != nil {
 		log.Infof("UDP广播发送失败，%s: ", err)
 	}
@@ -24,18 +23,9 @@ func main() {
 
 	go listenUdp(socket)
 
-	_, err = socket.Write([]byte(utils.Query)) // 发送数据
+	_, err = socket.WriteToUDP([]byte(utils.Query), dstAddr) // 发送数据
 	if err != nil {
 		fmt.Println("发送数据失败，err: ", err)
-		return
-	}
-
-	time.Sleep(10 * time.Second)
-
-	time.Sleep(10 * time.Second)
-	_, err = socket.Write([]byte(utils.UnLock)) // 发送数据
-	if err != nil {
-		fmt.Println("发送lock数据失败，err: ", err)
 		return
 	}
 	<-c
@@ -45,6 +35,7 @@ func listenUdp(socket *net.UDPConn) {
 	for {
 		data := make([]byte, 4096)
 		n, remoteAddr, err := socket.ReadFromUDP(data) // 接收数据
+		log.Infof("read %s from <%s>\n", data[:n], socket.RemoteAddr())
 		if err != nil {
 			fmt.Println("接收数据失败, err: ", err)
 			return

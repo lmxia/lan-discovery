@@ -2,11 +2,12 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"sync"
 	"syscall"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,45 +31,37 @@ type HostTwin struct {
 }
 
 // NewBroadcaster creates a new UDP multicast connection on which to broadcast
-func NewBroadcaster() (*net.UDPConn, error) {
-	broadcastAddr, err := net.ResolveUDPAddr("udp", "255.255.255.255:2000")
+func NewBroadcaster() (*net.UDPConn, *net.UDPAddr, error) {
+	srcAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 0}
+	dstAddr := &net.UDPAddr{IP: net.ParseIP("192.168.0.255"), Port: 2000}
+	conn, err := net.ListenUDP("udp", srcAddr)
 	if err != nil {
-		panic(err)
-	}
-	udpConn, err := net.DialUDP("udp", nil, broadcastAddr)
-	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return udpConn, nil
+	return conn, dstAddr, nil
 }
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a hander
-func Listen(address string, handler func(*net.UDPConn, *net.UDPAddr, int, []byte)) {
-	// Parse the string address
-	addr, err := net.ResolveUDPAddr("udp", address)
+func Listen(port int, handler func(*net.UDPConn, *net.UDPAddr, int, []byte)) {
+	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4zero, Port: port})
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
-
-	// Open up a connection
-	conn, err := net.ListenUDP("udp4", addr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	conn.SetReadBuffer(maxDatagramSize)
-	defer conn.Close()
+	log.Infof("Local: <%s> \n", listener.LocalAddr().String())
+	listener.SetReadBuffer(maxDatagramSize)
+	defer listener.Close()
 	// Loop forever reading from the socket
+	buffer := make([]byte, maxDatagramSize)
 	for {
-		buffer := make([]byte, maxDatagramSize)
-		numBytes, src, err := conn.ReadFromUDP(buffer)
+		numBytes, src, err := listener.ReadFromUDP(buffer)
 		if err != nil {
 			log.Fatal("ReadFromUDP failed:", err)
 		}
 
-		handler(conn, src, numBytes, buffer)
+		handler(listener, src, numBytes, buffer)
 	}
 }
 

@@ -42,6 +42,11 @@ func msgHandler(conn *net.UDPConn, src *net.UDPAddr, n int, content []byte) {
 		if err != nil {
 			log.Infof("Write to udp failed, err:  %s", err)
 		}
+	} else {
+		_, err = conn.WriteToUDP([]byte("nothing"), src) // 发送数据
+		if err != nil {
+			log.Infof("Write to udp failed, err:  %s", err)
+		}
 	}
 }
 
@@ -51,5 +56,5 @@ func main() {
 		syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 	utils.RegisterSignal(c)
 
-	utils.Listen(":2000", msgHandler)
+	utils.Listen(2000, msgHandler)
 }
